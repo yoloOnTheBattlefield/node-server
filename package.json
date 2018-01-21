@@ -1,0 +1,9 @@
+{
+  "name": "node-server",
+  "version": "1.0.0",
+  "description": "A node starter file with babel ES6 compiling",
+  "main": "index.js",
+  "repository": "https://github.com/yoloOnTheBattlefield/node-server.git",
+  "author": "Cristian Florea",
+  "license": "MIT"
+}
