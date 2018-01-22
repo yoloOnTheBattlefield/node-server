@@ -1,18 +1,17 @@
-import * as dotenv from "dotenv";
+import dotenv from "dotenv";
 import express from "express";
 import bodyParser from "body-parser";
 import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
 import { makeExecutableSchema } from "graphql-tools";
-import path from "path";
-import { fileLoader, mergeTypes, mergeResolvers } from "merge-graphql-schemas";
+import { typeDefs, resolvers } from "./src/graphql";
+import mongoose from "mongoose";
 import cors from "cors";
+import models from "./src/db";
 
-dotenv.config(); // load .env
+dotenv.config();
 
-const typeDefs = mergeTypes(fileLoader(path.join(__dirname, "./src/schema")));
-const resolvers = mergeResolvers(
-  fileLoader(path.join(__dirname, "./src/resolvers"))
-);
+mongoose.connect(process.env.DATABASE);
+mongoose.Promise = global.Promise;
 
 const schema = makeExecutableSchema({
   typeDefs,
@@ -20,17 +19,21 @@ const schema = makeExecutableSchema({
 });
 
 const app = express();
-const PORT = 8081;
+const PORT = process.env.PORT || 5000;
 const graphqlEndpoint = "/graphql";
 
 app.use(cors("*"));
 
 app.use(
   graphqlEndpoint,
+  bodyParser.urlencoded({ extended: true }),
   bodyParser.json(),
-  graphqlExpress(req => ({
-    schema
-  }))
+  graphqlExpress({
+    schema,
+    context: {
+      models
+    }
+  })
 );
 
 app.use("/graphiql", graphiqlExpress({ endpointURL: graphqlEndpoint }));
